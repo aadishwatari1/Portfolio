@@ -270,6 +270,39 @@
       transform: scale(1.04);
     }
 
+    /* Card Arrow Navigation */
+    .card-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(59, 71, 57, 0.75);
+      color: #ffffff;
+      border: none;
+      font-size: 1.2rem;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .card-arrow:hover {
+      background: rgba(59, 71, 57, 0.95);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .card-arrow.prev-arrow {
+      left: 6px;
+    }
+
+    .card-arrow.next-arrow {
+      right: 6px;
+    }
+
     /* Multiple Image Indicator Badge for Carousel Cards */
     .carousel-badge {
       position: absolute;
@@ -283,6 +316,7 @@
       font-family: 'Comfortaa', sans-serif;
       pointer-events: none;
       box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      z-index: 4;
     }
 
     .card-info h3 {
@@ -588,11 +622,13 @@
 
       <div class="portfolio-grid">
 
-        <!-- New Post 1: Psychology Oversimplified Carousel (1.png to 6.png) -->
-        <article class="design-card" onclick="openLightbox(['1.png', '2.png', '3.png', '4.png', '5.png', '6.png'], '01. Psychology Oversimplified Social Media Carousel')">
+        <!-- New Post 1: Psychology Oversimplified Carousel (1.png to 6.png) with Navigation Arrows -->
+        <article class="design-card" onclick="openLightbox(post1Images, '01. Psychology Oversimplified Social Media Carousel', post1Index)">
           <div class="image-frame">
-            <span class="carousel-badge">1/6 ❐</span>
-            <img src="1.png" alt="Design 1 - Psychology Oversimplified">
+            <span class="carousel-badge" id="post1-badge">1/6 ❐</span>
+            <button class="card-arrow prev-arrow" onclick="prevCardImage(event)">&#10094;</button>
+            <img src="1.png" id="post1-img" alt="Design 1 - Psychology Oversimplified">
+            <button class="card-arrow next-arrow" onclick="nextCardImage(event)">&#10095;</button>
           </div>
           <div class="card-info">
             <h3>01. Psychology Oversimplified</h3>
@@ -832,11 +868,31 @@
   </div>
 
   <script>
+    const post1Images = ['1.png', '2.png', '3.png', '4.png', '5.png', '6.png'];
+    let post1Index = 0;
+
+    function nextCardImage(event) {
+      event.stopPropagation();
+      post1Index = (post1Index + 1) % post1Images.length;
+      updateCardImage();
+    }
+
+    function prevCardImage(event) {
+      event.stopPropagation();
+      post1Index = (post1Index - 1 + post1Images.length) % post1Images.length;
+      updateCardImage();
+    }
+
+    function updateCardImage() {
+      document.getElementById('post1-img').src = post1Images[post1Index];
+      document.getElementById('post1-badge').textContent = `${post1Index + 1}/${post1Images.length} ❐`;
+    }
+
     let currentImages = [];
     let currentIndex = 0;
     let baseTitle = "";
 
-    function openLightbox(src, title) {
+    function openLightbox(src, title, startIdx = 0) {
       const lightbox = document.getElementById('lightbox');
       const prevBtn = document.getElementById('lightbox-prev');
       const nextBtn = document.getElementById('lightbox-next');
@@ -845,7 +901,7 @@
 
       if (Array.isArray(src)) {
         currentImages = src;
-        currentIndex = 0;
+        currentIndex = startIdx;
         prevBtn.style.display = 'block';
         nextBtn.style.display = 'block';
       } else {
